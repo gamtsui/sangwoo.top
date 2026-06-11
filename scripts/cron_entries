@@ -1,0 +1,17 @@
+#!/bin/bash
+# Setup system cron jobs for Sangwoo.top automation
+# Usage: sudo crontab -l > sangwoo.cron && cat cron_entries >> sangwoo.cron && crontab sangwoo.cron
+
+# Environment
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+MAILTO=""
+
+# News crawler + AI rewrite + publish - Daily at 08:00
+0 8 * * * cd /opt/sangwoo && docker compose exec fastapi python -m app.scheduler --task news --once >> /data/logs/cron_news.log 2>&1
+
+# Backup to S3 - Daily at 02:00
+0 2 * * * cd /opt/sangwoo && docker compose exec fastapi python -m app.scheduler --task backup --once >> /data/logs/cron_backup.log 2>&1
+
+# Health monitoring - Every 5 minutes
+*/5 * * * * cd /opt/sangwoo && docker compose exec fastapi python -m app.scheduler --task health --once >> /data/logs/cron_health.log 2>&1

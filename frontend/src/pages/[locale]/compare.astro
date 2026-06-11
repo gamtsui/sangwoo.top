@@ -1,0 +1,90 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import { getLocale } from '../../i18n/locales';
+import { fetchProducts } from '../../utils/api';
+
+export function getStaticPaths() {
+  return [
+    { params: { locale: 'zh' } },
+    { params: { locale: 'en' } },
+  ];
+}
+
+const urlLocale = Astro.url.pathname.split('/')[1];
+const locale = ['zh', 'en'].includes(urlLocale) ? urlLocale : 'zh';
+const t = getLocale(locale);
+const prefix = locale === 'en' ? '/en' : '/zh';
+const products = await fetchProducts();
+const productsJson = JSON.stringify(products);
+const prefixStr = prefix;
+const isZh = locale === 'zh';
+---
+
+<BaseLayout locale={locale} title={`${t.products.compare_title} - Sangwoo`}>
+  <Navbar locale={locale} slot="navbar" />
+
+  <section class="section pt-24">
+    <div class="container max-w-5xl" x-data="{
+      selected: [],
+      prefix: '{prefixStr}',
+      isZh: {isZh},
+      products: {productsJson},
+      get compareList() {{ return this.selected.map(id => this.products.find(p => p.id === id)).filter(Boolean); }},
+      add(id) {{ if (!this.selected.includes(id) && this.selected.length < 4) this.selected.push(id); }},
+      remove(id) {{ this.selected = this.selected.filter(i => i !== id); }}
+    }}">
+      <h1 class="section-title">{t.products.compare_title}</h1>
+      <p class="section-subtitle">{isZh ? '最多选择4个产品对比' : 'Select up to 4 products to compare'}</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        {products.map((product: any) => (
+          <div class="card p-4 flex items-center gap-3">
+            {product.images && product.images.length > 0 && (
+              <img src={`/uploads/${product.images[0]}`} alt="" class="w-12 h-12 object-cover rounded" />
+            )}
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium truncate">{isZh ? product.name_zh : product.name_en}</p>
+            </div>
+            <button x-on:click="selected.includes({product.id}) ? remove({product.id}) : add({product.id})"
+                    class="btn text-xs px-3 py-1"
+                    :class="selected.includes({product.id}) ? 'btn-primary' : 'btn-outline'">
+              <span x-show="!selected.includes({product.id})">{isZh ? '选择' : 'Select'}</span>
+              <span x-show="selected.includes({product.id})">{isZh ? '已选' : 'Selected'}</span>
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <template x-if="compareList.length >= 2">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-[#2a2a2a]">
+                <th class="p-3 text-left text-muted">{isZh ? '属性' : 'Attribute'}</th>
+                <template x-for="item in compareList" :key="item.id">
+                  <th class="p-3 text-left" x-text="isZh ? item.name_zh : item.name_en"></th>
+                </template>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b border-[#2a2a2a]">
+                <td class="p-3 text-muted">{isZh ? '描述' : 'Description'}</td>
+                <template x-for="item in compareList" :key="item.id">
+                  <td class="p-3" x-text="isZh ? item.description_zh : item.description_en"></td>
+                </template>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </template>
+
+      <template x-if="compareList.length < 2 && compareList.length > 0">
+        <p class="text-muted text-center">{isZh ? '请至少选择2个产品进行对比' : 'Please select at least 2 products to compare'}</p>
+      </template>
+    </div>
+  </section>
+
+  <Footer locale={locale} slot="footer" />
+</BaseLayout>

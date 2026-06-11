@@ -1,0 +1,55 @@
+{% extends "dashboard/base.html" %}
+{% set active = 'analytics' %}
+{% block title %}{{ _('analytics') }}{% endblock %}
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<div class="card mb-4">
+  <h3 class="font-bold mb-3">{{ _('pv_uv_chart') }}</h3>
+  <canvas id="pvChart" height="80"></canvas>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+  <div class="card">
+    <h3 class="font-bold mb-3">{{ _('top_pages') }}</h3>
+    <table>
+      <thead><tr><th>{{ _('page') }}</th><th>{{ _('count') }}</th></tr></thead>
+      <tbody>
+        {% for p in top_pages %}
+        <tr><td>{{ p.page or '/' }}</td><td>{{ p.count }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h3 class="font-bold mb-3">{{ _('top_sources') }}</h3>
+    <table>
+      <thead><tr><th>{{ _('source') }}</th><th>{{ _('count') }}</th></tr></thead>
+      <tbody>
+        {% for s in top_sources %}
+        <tr><td>{{ s.source or 'Direct' }}</td><td>{{ s.count }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<script>
+const ctx = document.getElementById('pvChart').getContext('2d');
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: {{ chart_labels | tojson }},
+    datasets: [
+      { label: 'PV', data: {{ chart_pv | tojson }}, borderColor: '#3b82f6', tension: 0.3 },
+      { label: 'UV', data: {{ chart_uv | tojson }}, borderColor: '#10b981', tension: 0.3 }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { labels: { color: '#9ca3af' } } },
+    scales: {
+      x: { ticks: { color: '#9ca3af' }, grid: { color: '#374151' } },
+      y: { ticks: { color: '#9ca3af' }, grid: { color: '#374151' } }
+    }
+  }
+});
+</script>
+{% endblock %}

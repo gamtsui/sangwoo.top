@@ -1,0 +1,88 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import { getLocale } from '../../i18n/locales';
+import { fetchContact } from '../../utils/api';
+
+const urlLocale = Astro.url.pathname.split('/')[1];
+const locale = ['zh', 'en'].includes(urlLocale) ? urlLocale : 'zh';
+const t = getLocale(locale);
+const prefix = locale === 'en' ? '/en' : '/zh';
+const contact = await fetchContact();
+
+export function getStaticPaths() {
+  return [
+    { params: { locale: 'zh' } },
+    { params: { locale: 'en' } },
+  ];
+}
+
+---
+
+<BaseLayout locale={locale} title={`${t.contact.title} - Sangwoo`}>
+  <Navbar locale={locale} slot="navbar" />
+
+  <section class="section pt-24">
+    <div class="container max-w-3xl">
+      <h1 class="section-title">{t.contact.title}</h1>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+        <div>
+          {contact && (
+            <div class="space-y-4 text-muted">
+              {contact.email && <p>{locale === 'zh' ? '邮箱' : 'Email'}: {contact.email}</p>}
+              {contact.phone && <p>{locale === 'zh' ? '电话' : 'Phone'}: {contact.phone}</p>}
+              {contact.address_zh && <p>{locale === 'zh' ? '地址' : 'Address'}: {locale === 'zh' ? contact.address_zh : contact.address_en}</p>}
+            </div>
+          )}
+        </div>
+
+        <div x-data="{ status: '', sending: false }">
+          <form @submit.prevent="async () => {
+            sending = true;
+            const res = await fetch('/api/submissions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: $refs.name.value,
+                email: $refs.email.value,
+                subject: $refs.subject.value,
+                message: $refs.message.value
+              })
+            });
+            if (res.ok) { status = '{t.contact.success}'; $refs.form.reset(); }
+            else { status = '{t.contact.error}'; }
+            sending = false;
+          }" x-ref="form">
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm mb-1">{t.contact.name}</label>
+                <input x-ref="name" type="text" required class="w-full bg-[#1e1e1e] border border-[#2a2a2a] rounded-lg px-4 py-2 text-sm focus:border-accent outline-none" />
+              </div>
+              <div>
+                <label class="block text-sm mb-1">{t.contact.email}</label>
+                <input x-ref="email" type="email" required class="w-full bg-[#1e1e1e] border border-[#2a2a2a] rounded-lg px-4 py-2 text-sm focus:border-accent outline-none" />
+              </div>
+              <div>
+                <label class="block text-sm mb-1">{t.contact.subject}</label>
+                <input x-ref="subject" type="text" class="w-full bg-[#1e1e1e] border border-[#2a2a2a] rounded-lg px-4 py-2 text-sm focus:border-accent outline-none" />
+              </div>
+              <div>
+                <label class="block text-sm mb-1">{t.contact.message}</label>
+                <textarea x-ref="message" required rows="4" class="w-full bg-[#1e1e1e] border border-[#2a2a2a] rounded-lg px-4 py-2 text-sm focus:border-accent outline-none"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary w-full" :disabled="sending">
+                <span x-show="!sending">{t.contact.send}</span>
+                <span x-show="sending">{t.contact.sending}</span>
+              </button>
+              <p x-show="status" class="text-sm" :class="status.includes('成功') || status.includes('successfully') ? 'text-green-400' : 'text-red-400'" x-text="status"></p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Footer locale={locale} slot="footer" />
+</BaseLayout>

@@ -1,0 +1,61 @@
+{% extends "dashboard/base.html" %}
+{% set active = 'overview' %}
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+  <div class="card">
+    <div class="text-gray-400 text-sm">{{ _('product_count') }}</div>
+    <div class="text-3xl font-bold">{{ product_count }}</div>
+  </div>
+  <div class="card">
+    <div class="text-gray-400 text-sm">{{ _('news_count') }}</div>
+    <div class="text-3xl font-bold">{{ news_count }}</div>
+  </div>
+  <div class="card">
+    <div class="text-gray-400 text-sm">{{ _('submission_count') }}</div>
+    <div class="text-3xl font-bold">{{ submission_count }}</div>
+  </div>
+  <div class="card">
+    <div class="text-gray-400 text-sm">{{ _('today_views') }}</div>
+    <div class="text-3xl font-bold">{{ today_views }}</div>
+  </div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div class="card">
+    <h3 class="font-bold mb-3">{{ _('quick_actions') }}</h3>
+    <div class="flex flex-wrap gap-2">
+      <a href="/admin" class="btn-sm">CRUDAdmin</a>
+      <a href="/admin/dashboard/analytics" class="btn-sm">{{ _('analytics') }}</a>
+      <a href="/admin/dashboard/health" class="btn-sm">{{ _('health') }}</a>
+      <a href="/admin/dashboard/backup" class="btn-sm">{{ _('backup') }}</a>
+    </div>
+  </div>
+  <div class="card">
+    <h3 class="font-bold mb-3">{{ _('system_status') }}</h3>
+    <div class="space-y-2 text-sm">
+      <div class="flex justify-between"><span>{{ _('cpu') }}</span><span>{{ health.cpu_percent }}%</span></div>
+      <div class="flex justify-between"><span>{{ _('memory') }}</span><span>{{ health.mem_percent }}%</span></div>
+      <div class="flex justify-between"><span>{{ _('disk') }}</span><span>{{ health.disk_percent }}%</span></div>
+      <div class="flex justify-between"><span>{{ _('uptime') }}</span><span>{{ health.uptime }}</span></div>
+    </div>
+  </div>
+</div>
+<div class="card mt-4">
+  <h3 class="font-bold mb-3">{{ _('recent_logs') }}</h3>
+  <table>
+    <thead><tr><th>{{ _('time') }}</th><th>{{ _('level') }}</th><th>{{ _('message') }}</th></tr></thead>
+    <tbody>
+      {% for log in recent_logs %}
+      <tr>
+        <td>{{ log.created_at }}</td>
+        <td>
+          <span class="px-1 rounded {% if log.level=='error' %}bg-red-900 text-red-300{% elif log.level=='warning' %}bg-yellow-900 text-yellow-300{% else %}bg-green-900 text-green-300{% endif %}">
+            {{ log.level }}
+          </span>
+        </td>
+        <td>{{ log.message }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

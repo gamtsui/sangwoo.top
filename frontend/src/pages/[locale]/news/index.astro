@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Navbar from '../../../components/Navbar.astro';
+import Footer from '../../../components/Footer.astro';
+import { getLocale } from '../../../i18n/locales';
+import { fetchNews } from '../../../utils/api';
+
+export function getStaticPaths() {
+  return [
+    { params: { locale: 'zh' } },
+    { params: { locale: 'en' } },
+  ];
+}
+
+const urlLocale = Astro.url.pathname.split('/')[1];
+const locale = ['zh', 'en'].includes(urlLocale) ? urlLocale : 'zh';
+const t = getLocale(locale);
+const prefix = locale === 'en' ? '/en' : '/zh';
+const news = await fetchNews();
+---
+
+<BaseLayout locale={locale} title={`${t.news.title} - Sangwoo`}>
+  <Navbar locale={locale} slot="navbar" />
+
+  <section class="section pt-24">
+    <div class="container max-w-3xl">
+      <h1 class="section-title">{t.news.title}</h1>
+      <p class="section-subtitle">{locale === 'zh' ? '行业动态与资讯' : 'Industry updates and insights'}</p>
+
+      {news.length === 0 ? (
+        <p class="text-muted text-center py-12">{t.news.no_news}</p>
+      ) : (
+        <div class="space-y-6">
+          {news.map((item: any) => (
+            <a href={`${prefix}/news/${item.slug}`} class="card block p-6">
+              <h3 class="font-semibold text-lg mb-2">{locale === 'zh' ? item.title_zh : item.title_en}</h3>
+              <p class="text-muted text-sm truncate-2 mb-3">{locale === 'zh' ? item.content_zh : item.content_en}</p>
+              <p class="text-xs text-muted">{t.news.published}: {new Date(item.published_at || item.created_at).toLocaleDateString(locale === 'zh' ? 'zh-CN' : 'en-US')}</p>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+
+  <Footer locale={locale} slot="footer" />
+</BaseLayout>

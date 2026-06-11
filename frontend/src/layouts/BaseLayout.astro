@@ -1,0 +1,54 @@
+---
+import '../styles/global.css';
+import ChatWidget from '../components/ChatWidget.astro';
+
+export interface Props {
+  locale: 'zh' | 'en';
+  title?: string;
+  description?: string;
+}
+
+const { locale = 'zh', title = 'Sangwoo - Premium Korean Food', description = 'Sangwoo - Premium Korean Food Importer' } = Astro.props;
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script>
+      // Analytics tracking
+      (function() {
+        const cookieName = 'sv_uid';
+        let uid = document.cookie.split(';').find(c => c.trim().startsWith(cookieName + '='))?.split('=')[1];
+        if (!uid) {
+          uid = 'u_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+          document.cookie = cookieName + '=' + uid + ';path=/;max-age=604800'; // 7 days
+        }
+        const track = () => {
+          navigator.sendBeacon && navigator.sendBeacon('/api/analytics', JSON.stringify({
+            page: location.pathname + location.search,
+            source: document.referrer || '(direct)',
+            user_agent: navigator.userAgent.slice(0, 300),
+            cookie_id: uid
+          }));
+        };
+        if (document.visibilityState === 'visible') track();
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') track(); });
+      })();
+    </script>
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <slot name="navbar" />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <slot name="footer" />
+    <ChatWidget />
+  </body>
+</html>

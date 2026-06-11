@@ -1,0 +1,61 @@
+{% extends "dashboard/base.html" %}
+{% set active = 'health' %}
+{% block title %}{{ _('health') }}{% endblock %}
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+  <div class="card">
+    <h4 class="font-bold mb-2">{{ _('cpu') }}%</h4>
+    <div class="text-3xl font-bold {% if health.cpu_percent > 80 %}text-red-400{% elif health.cpu_percent > 60 %}text-yellow-400{% else %}text-green-400{% endif %}">{{ health.cpu_percent }}%</div>
+    <div class="text-sm text-gray-400 mt-1">Cores: {{ health.cpu_count }}</div>
+  </div>
+  <div class="card">
+    <h4 class="font-bold mb-2">{{ _('memory') }}%</h4>
+    <div class="text-3xl font-bold {% if health.mem_percent > 85 %}text-red-400{% elif health.mem_percent > 70 %}text-yellow-400{% else %}text-green-400{% endif %}">{{ health.mem_percent }}%</div>
+    <div class="text-sm text-gray-400 mt-1">{{ health.mem_used }}GB / {{ health.mem_total }}GB</div>
+  </div>
+  <div class="card">
+    <h4 class="font-bold mb-2">{{ _('disk') }}%</h4>
+    <div class="text-3xl font-bold {% if health.disk_percent > 90 %}text-red-400{% elif health.disk_percent > 75 %}text-yellow-400{% else %}text-green-400{% endif %}">{{ health.disk_percent }}%</div>
+    <div class="text-sm text-gray-400 mt-1">{{ health.disk_used }}GB / {{ health.disk_total }}GB</div>
+  </div>
+</div>
+<div class="card mb-4">
+  <h4 class="font-bold mb-2">{{ _('services') }}</h4>
+  <table>
+    <thead><tr><th>{{ _('service_name') }}</th><th>{{ _('status') }}</th><th>{{ _('details') }}</th></tr></thead>
+    <tbody>
+      {% for svc in services %}
+      <tr>
+        <td>{{ svc.name }}</td>
+        <td><span class="px-2 py-0.5 rounded text-xs {% if svc.running %}bg-green-900 text-green-300{% else %}bg-red-900 text-red-300{% endif %}">{% if svc.running %}{{ _('running') }}{% else %}{{ _('stopped') }}{% endif %}</span></td>
+        <td class="text-gray-400 text-sm">{{ svc.detail }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div class="card">
+  <h4 class="font-bold mb-2">{{ _('system_info') }}</h4>
+  <div class="grid grid-cols-2 gap-2 text-sm">
+    <div>{{ _('hostname') }}: {{ health.hostname }}</div>
+    <div>{{ _('platform') }}: {{ health.platform }}</div>
+    <div>{{ _('uptime') }}: {{ health.uptime }}</div>
+    <div>{{ _('load_avg') }}: {{ health.load_avg }}</div>
+  </div>
+</div>
+<div class="card mt-4">
+  <h3 class="font-bold mb-3">{{ _('errors') }}</h3>
+  <table>
+    <thead><tr><th>{{ _('time') }}</th><th>{{ _('level') }}</th><th>{{ _('message') }}</th></tr></thead>
+    <tbody>
+      {% for log in recent_errors %}
+      <tr>
+        <td>{{ log.created_at }}</td>
+        <td><span class="px-1 rounded {% if log.level=='error' %}bg-red-900 text-red-300{% else %}bg-yellow-900 text-yellow-300{% endif %}">{{ log.level }}</span></td>
+        <td>{{ log.message }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

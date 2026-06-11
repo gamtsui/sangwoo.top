@@ -1,0 +1,50 @@
+---
+import { getLocale } from '../i18n/locales';
+
+export interface Props {
+  locale: 'zh' | 'en';
+}
+
+const { locale = 'zh' } = Astro.props;
+const t = getLocale(locale);
+const prefix = locale === 'en' ? '/en' : '/zh';
+---
+
+<footer class="bg-[#141414] border-t border-[#2a2a2a] py-12">
+  <div class="container">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div>
+        <h3 class="text-lg font-bold text-accent mb-4">SANGWOO</h3>
+        <p class="text-muted text-sm">{locale === 'zh' ? '韩国顶级食品进口商' : 'Premium Korean Food Importer'}</p>
+      </div>
+
+      <div>
+        <h4 class="font-semibold mb-4">{t.nav.products}</h4>
+        <ul class="space-y-2 text-sm text-muted">
+          <li><a href={`${prefix}/products`} class="hover:text-accent transition-colors">{locale === 'zh' ? '全部产品' : 'All Products'}</a></li>
+          <li><a href={`${prefix}/compare`} class="hover:text-accent transition-colors">{t.nav.compare}</a></li>
+          <li><a href={`${prefix}/finder`} class="hover:text-accent transition-colors">{t.nav.finder}</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-semibold mb-4">{t.nav.news}</h4>
+        <ul class="space-y-2 text-sm text-muted">
+          <li><a href={`${prefix}/news`} class="hover:text-accent transition-colors">{locale === 'zh' ? '最新资讯' : 'Latest News'}</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-semibold mb-4">{t.nav.contact}</h4>
+        <ul class="space-y-2 text-sm text-muted">
+          <li><a href={`${prefix}/contact`} class="hover:text-accent transition-colors">{locale === 'zh' ? '联系我们' : 'Contact Us'}</a></li>
+          <li><a href={`${prefix}/about`} class="hover:text-accent transition-colors">{t.nav.about}</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mt-8 pt-8 border-t border-[#2a2a2a] text-center text-sm text-muted">
+      &copy; {new Date().getFullYear()} Sangwoo. {t.footer.all_rights}
+    </div>
+  </div>
+</footer>

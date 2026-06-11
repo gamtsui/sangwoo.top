@@ -1,0 +1,127 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import { getLocale } from '../../i18n/locales';
+import { fetchProducts, fetchNews, fetchAbout, fetchContact, fetchSiteConfig } from '../../utils/api';
+
+const locale = Astro.url.pathname.startsWith('/en') ? 'en' : 'zh';
+const t = getLocale(locale);
+const prefix = locale === 'en' ? '/en' : '/zh';
+
+const products = await fetchProducts();
+const news = await fetchNews();
+const about = await fetchAbout();
+const contact = await fetchContact();
+const config = await fetchSiteConfig();
+
+// Module toggles from site config
+const showHero = config['hero_enabled'] ?? true;
+const showProducts = config['products_enabled'] ?? true;
+const showNews = config['news_enabled'] ?? true;
+const showAbout = config['about_enabled'] ?? true;
+const showContact = config['contact_enabled'] ?? true;
+
+export function getStaticPaths() {
+  return [
+    { params: { locale: 'zh' } },
+    { params: { locale: 'en' } },
+  ];
+}
+
+---
+
+<BaseLayout locale={locale}>
+  <Navbar locale={locale} slot="navbar" />
+
+  {showHero && (
+  <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#141414] to-[#0a0a0a]"></div>
+    <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 50% 50%, #c8a44e 1px, transparent 1px); background-size: 40px 40px;"></div>
+    <div class="relative container text-center">
+      <h1 class="text-4xl md:text-6xl font-bold mb-6">{t.home.hero_title}</h1>
+      <p class="text-xl text-muted mb-8 max-w-2xl mx-auto">{t.home.hero_subtitle}</p>
+      <a href={`${prefix}/products`} class="btn btn-primary text-lg">{t.home.hero_cta}</a>
+    </div>
+  </section>
+  )}
+
+  {showProducts && products.length > 0 && (
+    <section class="section">
+      <div class="container">
+        <h2 class="section-title">{t.home.products_title}</h2>
+        <p class="section-subtitle">{locale === 'zh' ? '精选韩国顶级食材' : 'Curated premium Korean ingredients'}</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {products.slice(0, 3).map((product: any) => (
+            <a href={`${prefix}/products/${product.slug}`} class="card block">
+              {product.images && product.images.length > 0 && (
+                <img src={`/uploads/${product.images[0]}`} alt={locale === 'zh' ? product.name_zh : product.name_en} class="w-full h-48 object-cover" />
+              )}
+              <div class="p-5">
+                <h3 class="font-semibold text-lg mb-2">{locale === 'zh' ? product.name_zh : product.name_en}</h3>
+                <p class="text-muted text-sm truncate-2">{locale === 'zh' ? product.description_zh : product.description_en}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+        <div class="text-center mt-8">
+          <a href={`${prefix}/products`} class="btn btn-outline">{t.home.products_more}</a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {showNews && news.length > 0 && (
+    <section class="section bg-surface">
+      <div class="container">
+        <h2 class="section-title">{t.home.news_title}</h2>
+        <p class="section-subtitle">{locale === 'zh' ? '行业动态与资讯' : 'Industry updates and news'}</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {news.slice(0, 3).map((item: any) => (
+            <a href={`${prefix}/news/${item.slug}`} class="card block">
+              <div class="p-5">
+                <h3 class="font-semibold text-lg mb-2">{locale === 'zh' ? item.title_zh : item.title_en}</h3>
+                <p class="text-muted text-sm truncate-2">{locale === 'zh' ? item.content_zh : item.content_en}</p>
+                <p class="text-xs text-muted mt-3">{t.news.published}: {new Date(item.published_at || item.created_at).toLocaleDateString(locale === 'zh' ? 'zh-CN' : 'en-US')}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+        <div class="text-center mt-8">
+          <a href={`${prefix}/news`} class="btn btn-outline">{t.home.news_more}</a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {showAbout && about && (
+    <section class="section">
+      <div class="container">
+        <h2 class="section-title">{t.home.about_title}</h2>
+        <div class="max-w-3xl">
+          <p class="text-muted leading-relaxed">{locale === 'zh' ? about.content_zh : about.content_en}</p>
+        </div>
+        <div class="mt-6">
+          <a href={`${prefix}/about`} class="btn btn-outline">{t.home.about_cta}</a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {showContact && (
+  <section class="section bg-surface">
+    <div class="container text-center">
+      <h2 class="section-title">{t.home.contact_title}</h2>
+      {contact && (
+        <div class="flex flex-wrap justify-center gap-8 text-muted my-8">
+          {contact.email && <span>{locale === 'zh' ? '邮箱' : 'Email'}: {contact.email}</span>}
+          {contact.phone && <span>{locale === 'zh' ? '电话' : 'Phone'}: {contact.phone}</span>}
+        </div>
+      )}
+      <a href={`${prefix}/contact`} class="btn btn-primary text-lg">{t.home.contact_cta}</a>
+    </div>
+  </section>
+  )}
+
+  <Footer locale={locale} slot="footer" />
+</BaseLayout>

@@ -1,0 +1,42 @@
+{% extends "dashboard/base.html" %}
+{% set active = 'backup' %}
+{% block title %}{{ _('backup') }}{% endblock %}
+{% block content %}
+<div class="card mb-4">
+  <h3 class="font-bold mb-3">{{ _('manual_backup') }}</h3>
+  <div class="flex gap-3">
+    <button class="btn" hx-post="/api/admin/backup/run" hx-target="#msg">{{ _('run_backup') }}</button>
+    <button class="btn" hx-post="/api/admin/backup/db" hx-target="#msg">{{ _('run_db_backup') }}</button>
+  </div>
+  <div id="msg" class="mt-2 text-sm"></div>
+</div>
+<div class="card mb-4">
+  <h3 class="font-bold mb-3">{{ _('backup_history') }}</h3>
+  <table>
+    <thead><tr><th>{{ _('created_at') }}</th><th>{{ _('status') }}</th><th>{{ _('size') }}</th><th>{{ _('details') }}</th></tr></thead>
+    <tbody>
+      {% for b in backups %}
+      <tr>
+        <td>{{ b.created_at }}</td>
+        <td><span class="px-1 rounded {% if b.status=='success' %}bg-green-900 text-green-300{% else %}bg-red-900 text-red-300{% endif %}">{{ b.status }}</span></td>
+        <td>{{ b.size }}</td>
+        <td>
+          <a href="/api/admin/backup/download/{{ b.id }}" class="text-blue-400 hover:text-blue-300 text-sm">{{ _('download') }}</a>
+          <button class="text-red-400 hover:text-red-300 text-sm ml-2" hx-post="/api/admin/backup/restore/{{ b.id }}" hx-confirm="{{ _('restore') }}?" hx-target="#msg">{{ _('restore') }}</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div class="card">
+  <h3 class="font-bold mb-3">{{ _('auto_backup') }}</h3>
+  <div class="flex items-center gap-4">
+    <label class="flex items-center gap-2">
+      <input type="checkbox" {% if auto_backup %}checked{% endif %} class="bg-gray-700">
+      {{ _('daily_auto_backup') }}
+    </label>
+    <span class="text-gray-400 text-sm">02:00 UTC+8, {{ _('backup_retention') }}</span>
+  </div>
+</div>
+{% endblock %}

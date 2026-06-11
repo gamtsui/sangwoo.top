@@ -1,0 +1,16 @@
+{% macro nav(active, _) %}
+<nav class="flex flex-wrap gap-2 mb-6 border-b border-gray-700 pb-2">
+  <a href="/admin/dashboard" class="px-3 py-1 rounded {% if active=='overview' %}bg-blue-600{% else %}hover:bg-gray-700{% endif %}">{{ _('overview') }}</a>
+  <a href="/admin/dashboard/analytics" class="px-3 py-1 rounded {% if active=='analytics' %}bg-blue-600{% else %}hover:bg-gray-700{% endif %}">{{ _('analytics') }}</a>
+  <a href="/admin/dashboard/modules" class="px-3 py-1 rounded {% if active=='modules' %}bg-blue-600{% else %}hover:bg-gray-700{% endif %}">{{ _('modules') }}</a>
+  <a href="/admin/dashboard/health" class="px-3 py-1 rounded {% if active=='health' %}bg-blue-600{% else %}hover:bg-gray-700{% endif %}">{{ _('health') }}</a>
+  <a href="/admin/dashboard/backup" class="px-3 py-1 rounded {% if active=='backup' %}bg-blue-600{% else %}hover:bg-gray-700{% endif %}">{{ _('backup') }}</a>
+  <a href="/admin/dashboard/uploads" class="px-3 py-1 rounded {% if active=='uploads' %}bg-blue-600{% else %}hover:bg-gray-700{% endif %}">{{ _('uploads') }}</a>
+  <span class="px-2 text-gray-600">|</span>
+  <a href="/admin/products" class="px-3 py-1 rounded hover:bg-gray-700 text-amber-400">{{ _('total_products') }} (CRUDAdmin)</a>
+  <a href="/admin/news" class="px-3 py-1 rounded hover:bg-gray-700 text-amber-400">{{ _('published_news') }} (CRUDAdmin)</a>
+  <a href="/admin/site_settings" class="px-3 py-1 rounded hover:bg-gray-700 text-amber-400">{{ _('settings') }} (CRUDAdmin)</a>
+  <a href="/admin/about_company" class="px-3 py-1 rounded hover:bg-gray-700 text-amber-400">{{ _('about_company') }} (CRUDAdmin)</a>
+  <a href="/admin/contact" class="px-3 py-1 rounded hover:bg-gray-700 text-amber-400">{{ _('contact') }} (CRUDAdmin)</a>
+</nav>
+{% endmacro %}

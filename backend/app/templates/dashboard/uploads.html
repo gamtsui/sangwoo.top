@@ -1,0 +1,33 @@
+{% extends "dashboard/base.html" %}
+{% set active = 'uploads' %}
+{% block title %}{{ _('uploads') }}{% endblock %}
+{% block content %}
+<div class="card mb-4">
+  <h3 class="font-bold mb-3">{{ _('upload_files') }}</h3>
+  <form enctype="multipart/form-data" hx-post="/api/admin/upload" hx-target="#upload-result" hx-encoding='multipart/form-data'>
+    <div class="flex gap-3 items-end">
+      <div>
+        <label class="text-sm text-gray-400">{{ _('product_slug') }}</label>
+        <input type="text" name="product_slug" placeholder="e.g. product-name" class="block mt-1" required>
+      </div>
+      <div>
+        <label class="text-sm text-gray-400">{{ _('select_files') }} (jpg/png/webp, max 5MB)</label>
+        <input type="file" name="files" multiple accept=".jpg,.jpeg,.png,.webp" class="block mt-1" required>
+      </div>
+      <button type="submit" class="btn">{{ _('upload') }}</button>
+    </div>
+  </form>
+  <div id="upload-result" class="mt-2 text-sm"></div>
+</div>
+<div class="card">
+  <h3 class="font-bold mb-3">{{ _('storage') }}</h3>
+  <div class="space-y-2">
+    <div class="flex justify-between text-sm"><span>{{ _('total_storage') }}</span><span>{{ storage.total }}MB</span></div>
+    <div class="flex justify-between text-sm"><span>Products</span><span>{{ storage.products }}MB</span></div>
+    <div class="w-full bg-gray-700 rounded-full h-2">
+      <div class="bg-blue-600 h-2 rounded-full" style="width: {{ storage.percent }}%"></div>
+    </div>
+    <div class="text-xs text-gray-400">Limit: 500MB</div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Navbar from '../../../components/Navbar.astro';
+import Footer from '../../../components/Footer.astro';
+import { getLocale } from '../../../i18n/locales';
+import { fetchNews } from '../../../utils/api';
+
+const slug = Astro.params.slug;
+const urlLocale = Astro.url.pathname.split('/')[1];
+const locale = ['zh', 'en'].includes(urlLocale) ? urlLocale : 'zh';
+const t = getLocale(locale);
+const prefix = locale === 'en' ? '/en' : '/zh';
+
+const news = await fetchNews();
+const item = news.find((n: any) => n.slug === slug);
+
+if (!item) {
+  return Astro.response = new Response(locale === 'zh' ? '文章未找到' : 'Article not found', { status: 404 });
+}
+
+export async function getStaticPaths() {
+  const items = await fetchNews();
+  const locales = ['zh', 'en'];
+  return locales.flatMap((loc) =>
+    items.map((item) => ({
+      params: { locale: loc, slug: item.slug },
+    }))
+  );
+}
+
+---
+
+<BaseLayout locale={locale} title={`${locale === 'zh' ? item.title_zh : item.title_en} - Sangwoo`}>
+  <Navbar locale={locale} slot="navbar" />
+
+  <section class="section pt-24">
+    <div class="container max-w-3xl">
+      <a href={`${prefix}/news`} class="text-accent text-sm mb-6 inline-block">{t.news.back}</a>
+      <h1 class="text-3xl font-bold mb-4">{locale === 'zh' ? item.title_zh : item.title_en}</h1>
+      <p class="text-xs text-muted mb-8">{t.news.published}: {new Date(item.published_at || item.created_at).toLocaleDateString(locale === 'zh' ? 'zh-CN' : 'en-US')}</p>
+      <div class="text-muted leading-relaxed whitespace-pre-wrap">{locale === 'zh' ? item.content_zh : item.content_en}</div>
+    </div>
+  </section>
+
+  <Footer locale={locale} slot="footer" />
+</BaseLayout>

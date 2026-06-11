@@ -1,0 +1,77 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import { getLocale } from '../../i18n/locales';
+import { fetchProducts } from '../../utils/api';
+
+export function getStaticPaths() {
+  return [
+    { params: { locale: 'zh' } },
+    { params: { locale: 'en' } },
+  ];
+}
+
+const urlLocale = Astro.url.pathname.split('/')[1];
+const locale = ['zh', 'en'].includes(urlLocale) ? urlLocale : 'zh';
+const t = getLocale(locale);
+const prefix = locale === 'en' ? '/en' : '/zh';
+const products = await fetchProducts();
+const productsJson = JSON.stringify(products);
+const prefixStr = prefix;
+---
+
+<BaseLayout locale={locale} title={`${t.products.finder_title} - Sangwoo`}>
+  <Navbar locale={locale} slot="navbar" />
+
+  <section class="section pt-24">
+    <div class="container max-w-4xl" x-data="{
+      query: '',
+      prefix: '{prefixStr}',
+      products: {productsJson},
+      get filtered() {{
+        if (!this.query.trim()) return this.products;
+        const q = this.query.toLowerCase();
+        return this.products.filter(p =>
+          (p.name_zh || '').toLowerCase().includes(q) ||
+          (p.name_en || '').toLowerCase().includes(q) ||
+          (p.description_zh || '').toLowerCase().includes(q) ||
+          (p.description_en || '').toLowerCase().includes(q)
+        );
+      }},
+      isZh: {locale === 'zh'}
+    }}">
+      <h1 class="section-title">{t.products.finder_title}</h1>
+      <p class="section-subtitle">{locale === 'zh' ? '搜索您需要的产品' : 'Search for the product you need'}</p>
+
+      <div class="mb-8">
+        <input x-model="query" type="text" placeholder="{t.products.finder_search}"
+               class="w-full bg-[#1e1e1e] border border-[#2a2a2a] rounded-xl px-6 py-4 text-lg focus:border-accent outline-none" />
+      </div>
+
+      <p class="text-muted text-sm mb-4" x-text="filtered.length + (isZh ? ' 个结果' : ' results')"></p>
+
+      <template x-if="filtered.length === 0 && query.trim()">
+        <p class="text-muted text-center py-12">{t.products.finder_no_results}</p>
+      </template>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <template x-for="item in filtered" :key="item.id">
+          <a :href="prefix + '/products/' + item.slug" class="card block">
+            <div class="flex gap-4 p-5">
+              <template x-if="item.images && item.images.length > 0">
+                <img :src="'/uploads/' + item.images[0]" :alt="isZh ? item.name_zh : item.name_en" class="w-20 h-20 object-cover rounded-lg flex-shrink-0" />
+              </template>
+              <div>
+                <h3 class="font-semibold mb-1" x-text="isZh ? item.name_zh : item.name_en"></h3>
+                <p class="text-muted text-sm truncate-2" x-text="isZh ? item.description_zh : item.description_en"></p>
+              </div>
+            </div>
+          </a>
+        </template>
+      </div>
+    </div>
+  </section>
+
+  <Footer locale={locale} slot="footer" />
+</BaseLayout>

@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+.venv/
+
+# Database
+*.db
+*.db-journal
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Docker
+data/
+
+# SSL (certificates)
+ssl/*.pem
+
+# Logs
+*.log
+logs/
+
+# Frontend build
+frontend/dist/
+frontend/node_modules/

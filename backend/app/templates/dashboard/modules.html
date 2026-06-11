@@ -1,0 +1,26 @@
+{% extends "dashboard/base.html" %}
+{% set active = 'modules' %}
+{% block title %}{{ _('modules') }}{% endblock %}
+{% block content %}
+<div class="card">
+  <h3 class="font-bold mb-4">{{ _('toggle_modules') }}</h3>
+  <form hx-post="/api/admin/modules" hx-target="#msg" class="space-y-4">
+    {% for module in modules %}
+    <div class="flex items-center justify-between py-2 border-b border-gray-700">
+      <div>
+        <div class="font-medium">{{ module.name }}</div>
+        <div class="text-sm text-gray-400">{{ module.description }}</div>
+      </div>
+      <label class="relative inline-flex items-center cursor-pointer">
+        <input type="checkbox" name="{{ module.key }}" value="true" {% if module.enabled %}checked{% endif %} class="sr-only peer">
+        <div class="w-11 h-6 bg-gray-600 peer-checked:bg-blue-600 rounded-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+      </label>
+    </div>
+    {% endfor %}
+    <div class="text-right">
+      <button type="submit" class="btn">{{ _('save') }}</button>
+    </div>
+  </form>
+  <div id="msg" class="mt-2 text-sm"></div>
+</div>
+{% endblock %}

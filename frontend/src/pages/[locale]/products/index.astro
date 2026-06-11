@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Navbar from '../../../components/Navbar.astro';
+import Footer from '../../../components/Footer.astro';
+import { getLocale } from '../../../i18n/locales';
+import { fetchProducts } from '../../../utils/api';
+
+const urlLocale = Astro.url.pathname.split('/')[1];
+const locale = ['zh', 'en'].includes(urlLocale) ? urlLocale : 'zh';
+const t = getLocale(locale);
+const prefix = locale === 'en' ? '/en' : '/zh';
+const products = await fetchProducts();
+
+export function getStaticPaths() {
+  return [
+    { params: { locale: 'zh' } },
+    { params: { locale: 'en' } },
+  ];
+}
+
+---
+
+<BaseLayout locale={locale} title={`${t.products.title} - Sangwoo`}>
+  <Navbar locale={locale} slot="navbar" />
+
+  <section class="section pt-24">
+    <div class="container">
+      <h1 class="section-title">{t.products.title}</h1>
+      <p class="section-subtitle">{locale === 'zh' ? '探索我们的韩国顶级食品' : 'Explore our premium Korean food selection'}</p>
+
+      {products.length === 0 ? (
+        <p class="text-muted text-center py-12">{t.products.no_products}</p>
+      ) : (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {products.map((product: any) => (
+            <a href={`${prefix}/products/${product.slug}`} class="card block">
+              {product.images && product.images.length > 0 && (
+                <img src={`/uploads/${product.images[0]}`} alt={locale === 'zh' ? product.name_zh : product.name_en} class="w-full h-56 object-cover" />
+              )}
+              <div class="p-5">
+                <h3 class="font-semibold text-lg mb-2">{locale === 'zh' ? product.name_zh : product.name_en}</h3>
+                <p class="text-muted text-sm truncate-3">{locale === 'zh' ? product.description_zh : product.description_en}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+
+  <Footer locale={locale} slot="footer" />
+</BaseLayout>

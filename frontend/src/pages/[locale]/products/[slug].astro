@@ -1,0 +1,92 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Navbar from '../../../components/Navbar.astro';
+import Footer from '../../../components/Footer.astro';
+import { getLocale } from '../../../i18n/locales';
+import { fetchProducts } from '../../../utils/api';
+
+const slug = Astro.params.slug;
+const urlLocale = Astro.url.pathname.split('/')[1];
+const locale = ['zh', 'en'].includes(urlLocale) ? urlLocale : 'zh';
+const t = getLocale(locale);
+const prefix = locale === 'en' ? '/en' : '/zh';
+
+const products = await fetchProducts();
+const product = products.find((p: any) => p.slug === slug);
+
+if (!product) {
+  return Astro.response = new Response(locale === 'zh' ? '产品未找到' : 'Product not found', { status: 404 });
+}
+
+const specs = product.specifications ? Object.entries(product.specifications) : [];
+
+export async function getStaticPaths() {
+  const products = await fetchProducts();
+  const locales = ['zh', 'en'];
+  return locales.flatMap((loc) =>
+    products.map((product) => ({
+      params: { locale: loc, slug: product.slug },
+    }))
+  );
+}
+
+const apiBase = import.meta.env.BUILD_API || 'http://localhost:8000';
+const productJson = JSON.stringify(product);
+---
+
+<BaseLayout locale={locale} title={`${locale === 'zh' ? product.name_zh : product.name_en} - Sangwoo`}>
+  <Navbar locale={locale} slot="navbar" />
+
+  <section class="section pt-24">
+    <div class="container max-w-4xl" x-data="{
+      product: {productJson},
+      locale: '{locale}',
+      prefix: '{prefix}',
+      t: {JSON.stringify(t)},
+      mainImage: this.product.images ? this.product.images[0] : null,
+      specs: {JSON.stringify(specs)}
+    }">
+      <a href={`${prefix}/products`} class="text-accent text-sm mb-6 inline-block">{t.products.back}</a>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <template x-if="mainImage">
+            <img :src="`/uploads/${mainImage}`" :alt="locale === 'zh' ? product.name_zh : product.name_en" class="rounded-xl w-full" />
+          </template>
+          <template x-if="!mainImage">
+            <div class="bg-surface rounded-xl h-80 flex items-center justify-center text-muted">No image</div>
+          </template>
+          <template x-if="product.images && product.images.length > 1">
+            <div class="flex gap-3 mt-4">
+              <template x-for="(img, idx) in product.images.slice(1)" :key="idx">
+                <img :src="`/uploads/${img}`" alt="" class="w-20 h-20 object-cover rounded-lg border border-[#2a2a2a] cursor-pointer hover:border-accent transition-colors"
+                     @click="mainImage = img" />
+              </template>
+            </div>
+          </template>
+        </div>
+
+        <div>
+          <h1 class="text-3xl font-bold mb-4" x-text="locale === 'zh' ? product.name_zh : product.name_en"></h1>
+          <p class="text-muted leading-relaxed mb-6" x-text="locale === 'zh' ? product.description_zh : product.description_en"></p>
+
+          <template x-if="specs.length > 0">
+            <div class="bg-surface rounded-xl p-6">
+              <h3 class="font-semibold mb-4">{t.products.specifications}</h3>
+              <dl class="space-y-3">
+                <template x-for="[key, value] in specs" :key="key">
+                  <div class="flex justify-between text-sm">
+                    <dt class="text-muted" x-text="key"></dt>
+                    <dd class="font-medium" x-text="String(value)"></dd>
+                  </div>
+                </template>
+              </dl>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <Footer locale={locale} slot="footer" />
+</BaseLayout>
