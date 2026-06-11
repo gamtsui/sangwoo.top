@@ -9,23 +9,19 @@ echo "=== Setting up SSL for $DOMAIN ==="
 
 # Install certbot if not installed
 if ! command -v certbot &> /dev/null; then
-    sudo yum install -y certbot python3-certbot-nginx
+    sudo apt-get update && sudo apt-get install -y certbot python3-certbot-nginx
 fi
 
 # Stop nginx temporarily
-sudo systemctl stop nginx
+sudo systemctl stop nginx || sudo docker stop sangwoo-nginx 2>/dev/null || true
+
+# Create ACME challenge directory
+sudo mkdir -p /var/www/certbot
 
 # Get certificate
 sudo certbot certonly --standalone -d $DOMAIN -d www.$DOMAIN --email $EMAIL --agree-tos --no-eff-email
 
-# Copy certs to project ssl directory
-sudo cp /etc/letsencrypt/live/$DOMAIN/fullchain.pem ../ssl/
-sudo cp /etc/letsencrypt/live/$DOMAIN/privkey.pem ../ssl/
-
-# Restart nginx
-sudo systemctl start nginx
-
 # Setup auto-renewal
-sudo crontab -l | { cat; echo "0 3 * * * /usr/bin/certbot renew --quiet"; } | sudo crontab -
+sudo crontab -l | { cat; echo "0 3 * * * /usr/bin/certbot renew --quiet --post-hook 'systemctl reload nginx'"; } | sudo crontab -
 
 echo "=== SSL setup complete ==="
