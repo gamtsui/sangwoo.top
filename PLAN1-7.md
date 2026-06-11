@@ -274,26 +274,33 @@
 
 ---
 
-## PLAN6 - CI/CD + 安全加固（约 1 天）
+## PLAN6 - CI/CD + 安全加固（约 1 天）✅ 已完成
 **目标上下文量：~15K**
+**完成日期：2026-06-11**
 
-### 6.1 GitHub Actions
+### 6.1 GitHub Actions ✅
 - 推送代码到 main 分支触发 Astro 构建
 - 构建产物通过 SSH 同步到 EC2 /opt/sangwoo/frontend/dist/
 - 自动 reload Nginx
 
-### 6.2 安全加固
-- Nginx：限流、防 CC、隐藏版本信息
-- SSL：Let's Encrypt 自动续期（已有）
+### 6.2 安全加固 ✅
+- Nginx：限流 (API 10r/s, login 1r/s)、防 CC、隐藏版本信息
+- SSL：Let's Encrypt 自动续期（配置完成）
 - 后台管理：用户名+密码+二次验证（已有 PLAN2）
 - 数据库：加密备份到 S3（已有 PLAN5）
 
-### 6.3 DNS + 域名
-- 确认 sangwoo.top DNS 解析到新 IP 54.86.238.1
+### 6.3 DNS + 域名 ⏳
+- DNS 记录需要更新：当前 54.152.184.117 → 目标 54.226.63.195
 
 ### 交付物
-- 代码推送到 GitHub 自动构建部署
-- 安全防护到位
+- `.github/workflows/deploy.yml` — CI/CD 工作流 ✅
+- `nginx/sangwoo.top.conf` — 安全加固配置 ✅
+- `scripts/setup-ssl.sh` — SSL 配置脚本 (Debian) ✅
+- `GITHUB_SECRETS.md` — GitHub Secrets 配置说明 ✅
+
+### 待完成
+- [ ] 手动更新 DNS A 记录到 54.226.63.195
+- [ ] 配置 GitHub Secrets (EC2_HOST, EC2_USER, EC2_SSH_KEY)
 
 ---
 
