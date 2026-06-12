@@ -97,17 +97,19 @@ async def get_stats(days: int = 30):
             .all()
         )
 
-        # Daily PV
-        daily = (
-            session.query(
-                Analytics.date.cast(str).label("day"),
-                func.count(Analytics.id).label("pv"),
-            )
-            .filter(Analytics.date >= cutoff)
-            .group_by(Analytics.date.cast(str))
-            .order_by(Analytics.date.asc())
-            .all()
-        )
+        # Daily PV - use text SQL for SQLite compatibility
+        from sqlalchemy import text as sa_text
+        daily_rows = session.execute(
+            sa_text("""
+                SELECT strftime('%Y-%m-%d', date) as day, COUNT(id) as pv
+                FROM analytics
+                WHERE date >= :cutoff
+                GROUP BY day
+                ORDER BY day ASC
+            """),
+            {"cutoff": cutoff.strftime("%Y-%m-%d %H:%M:%S")},
+        ).fetchall()
+        daily = [{"day": row[0], "pv": row[1]} for row in daily_rows]
 
         return {
             "total_pv": total_pv,
@@ -115,7 +117,7 @@ async def get_stats(days: int = 30):
             "days": days,
             "top_pages": [{"page": p.page, "views": p.views} for p in top_pages],
             "top_sources": [{"source": s.source, "views": s.views} for s in top_sources],
-            "daily": [{"day": d.day[:10], "pv": d.pv} for d in daily],
+            "daily": daily,
         }
     except Exception as e:
         logger.error(f"Analytics stats error: {e}")

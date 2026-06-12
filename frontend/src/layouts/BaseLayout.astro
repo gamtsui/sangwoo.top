@@ -6,9 +6,17 @@ export interface Props {
   locale: 'zh' | 'en';
   title?: string;
   description?: string;
+  image?: string;
 }
 
-const { locale = 'zh', title = 'Sangwoo - Premium Korean Food', description = 'Sangwoo - Premium Korean Food Importer' } = Astro.props;
+const { locale = 'zh', title = 'Sangwoo - Premium Korean Food', description = 'Sangwoo - Premium Korean Food Importer', image = '/og-image.jpg' } = Astro.props;
+
+const siteTitle = '杉宇国际贸易 - Premium Korean Food';
+const siteDesc = locale === 'zh'
+  ? '杉宇国际贸易 — 韩国优质食品进口商。高丽参、泡菜、蜂蜜茶、芝麻油等正宗韩国食品，直供中国市场。'
+  : 'Sangwoo International Trading — Premium Korean food importer. Authentic CheongKwanJang ginseng, kimchi, honey tea, sesame oil and more.';
+const canonicalUrl = `https://sangwoo.top/${locale}${Astro.url.pathname.slice(locale.length + 1)}`;
+const ogImage = `https://sangwoo.top${image}`;
 ---
 
 <!doctype html>
@@ -16,10 +24,34 @@ const { locale = 'zh', title = 'Sangwoo - Premium Korean Food', description = 'S
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content={description} />
+    <meta name="description" content={description || siteDesc} />
+    <meta name="keywords" content={locale === 'zh'
+      ? '韩国食品进口,高丽参,正官庄,泡菜,韩国蜂蜜茶,芝麻油,海藻提取物,杉宇国际贸易'
+      : 'Korean food import,CheongKwanJang,ginseng,kimchi,Korean honey tea,sesame oil,Sangwoo trading'} 
+    />
+    <meta name="author" content="杉宇国际贸易 Sangwoo International" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={canonicalUrl} />
     <meta name="generator" content={Astro.generator} />
-    <title>{title}</title>
+    <title>{title || `${siteTitle} | Sangwoo International`}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={title || siteTitle} />
+    <meta property="og:description" content={description || siteDesc} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content={locale === 'zh' ? 'zh_CN' : 'en_US'} />
+    <meta property="og:site_name" content="Sangwoo International" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title || siteTitle} />
+    <meta name="twitter:description" content={description || siteDesc} />
+    <meta name="twitter:image" content={ogImage} />
+
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
       // Analytics tracking

@@ -298,9 +298,9 @@
 - `scripts/setup-ssl.sh` — SSL 配置脚本 (Debian) ✅
 - `GITHUB_SECRETS.md` — GitHub Secrets 配置说明 ✅
 
-### 待完成
-- [ ] 手动更新 DNS A 记录到 54.226.63.195
-- [ ] 配置 GitHub Secrets (EC2_HOST, EC2_USER, EC2_SSH_KEY)
+### ✅ 待完成已全部完成（2026-06-11）
+- [x] DNS A 记录已更新到 54.226.63.195
+- [x] GitHub Secrets 已配置 (EC2_HOST, EC2_USER, EC2_SSH_KEY)
 
 ---
 
@@ -328,5 +328,33 @@
 - Nginx Gzip/Brotli 压缩
 
 ### 交付物
-- 网站正式上线运行
-- 内容完整
+- 网站正式上线运行 ✅
+- 内容完整 ✅
+- `backend/app/seed.py` — 种子数据脚本 ✅
+
+### ✅ PLAN7 完成状态（2026-06-11）
+
+#### 7.1 内容迁移 ✅
+- [x] 产品数据：6 个产品（正官庄高丽参、初乳素奶粉、蜂蜜茶、泡菜、海藻提取物、芝麻油）
+- [x] 新闻数据：3 篇资讯（开业公告、市场分析、人参皂苷科普）
+- [x] 公司介绍：中韩双语
+- [x] 联系方式：电话 +86-21-5888-8888、邮箱 contact@sangwoo.top
+- [x] 网站设置：模块配置（产品、新闻、联系、对比、查找器、客服）
+- [x] 前端重建：32 页静态页面（中英双语）
+- [x] Nginx trailing slash 修复
+
+#### 7.2 全链路测试 ✅
+- [x] 首页加载：200 OK，产品卡片正常渲染
+- [x] 双语切换：/zh/ 和 /en/ 均正常
+- [x] 产品浏览：列表页 + 详情页均正常
+- [x] 新闻浏览：列表页 + 详情页均正常
+- [x] 关于页面：中韩双语内容正常
+- [x] 联系页面：邮箱、电话正常展示
+- [x] API 接口：/api/products (6项)、/api/news (3项)、/api/about、/api/contact、/health 均正常
+- [x] 12 个页面全部 200 OK
+
+#### 7.3 后续优化（2026-06-11 全部完成）
+- [x] 产品图片上传：placeholder 占位图片已创建（6个产品），图片路径双重前缀问题已修复（/uploads//uploads/ → /uploads/）
+- [x] Nginx Gzip 压缩：已启用 gzip_comp_level 6，支持 HTML/CSS/JS/JSON/SVG
+- [x] 联系表单提交：POST /api/submissions 正常，返回 201 Created
+- [x] 后台 CRUD 操作：/admin 登录页正常（303 鉴权重定向），CRUDAdmin i18n 中文切换已修复

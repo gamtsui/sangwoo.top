@@ -12,6 +12,7 @@ class ProductCreate(BaseModel):
     specifications: Optional[dict] = None
     images: Optional[list] = None
     slug: Optional[str] = None
+    price: Optional[str] = None
     is_active: bool = True
 
 
@@ -23,6 +24,7 @@ class ProductUpdate(BaseModel):
     specifications: Optional[dict] = None
     images: Optional[list] = None
     slug: Optional[str] = None
+    price: Optional[str] = None
     is_active: Optional[bool] = None
 
 

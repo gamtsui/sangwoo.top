@@ -14,6 +14,7 @@ class Products(Base):
     specifications = Column(JSON)
     images = Column(JSON)  # Array of image paths
     slug = Column(String(200), unique=True)
+    price = Column(String(50))  # Price with currency (e.g., "₩15,000" or "¥128")
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)

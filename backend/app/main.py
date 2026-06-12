@@ -6,7 +6,6 @@ from contextlib import asynccontextmanager
 from typing import Optional
 from datetime import datetime
 import os
-import secrets
 
 from crudadmin import CRUDAdmin
 
@@ -20,11 +19,13 @@ from .dashboard import router as dashboard_router
 from .ai_chat import router as ai_chat_router
 from .translate_webhook import router as translate_webhook_router, _trigger_translation
 from .analytics import router as analytics_router
+from .upload_router import router as upload_router
+from .auth import require_admin
 
 # ============ CRUDAdmin Setup ============
 ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'changeme')
-SECRET_KEY = os.getenv('SECRET_KEY', secrets.token_hex(32))
+from .auth import ADMIN_SECRET_KEY as SECRET_KEY
 
 admin = CRUDAdmin(
     session=get_session,
@@ -46,13 +47,7 @@ admin.add_view(model=Analytics, create_schema=schemas.AnalyticsCreate, update_sc
 admin.add_view(model=SystemLog, create_schema=schemas.SystemLogCreate, update_schema=schemas.SystemLogUpdate, allowed_actions={"view"})
 
 
-def require_admin(authorization: str = Header(None)):
-    if not authorization or not authorization.startswith('Bearer '):
-        raise HTTPException(status_code=401, detail='Unauthorized')
-    token = authorization.split('Bearer ')[1]
-    if token != SECRET_KEY:
-        raise HTTPException(status_code=401, detail='Invalid token')
-    return token
+# require_admin is imported from .auth module
 
 
 # ============ App Setup ============
@@ -70,6 +65,7 @@ app.include_router(dashboard_router)
 app.include_router(ai_chat_router)
 app.include_router(translate_webhook_router)
 app.include_router(analytics_router)
+app.include_router(upload_router)
 
 # Mount CRUDAdmin at /admin
 app.mount("/admin", admin.app)

@@ -22,7 +22,33 @@ async_engine = create_async_engine(ASYNC_DATABASE_URL, connect_args={'check_same
 
 def init_db():
     Base.metadata.create_all(bind=engine)
+    _migrate_db()
     _seed_default_modules()
+
+
+def _migrate_db():
+    """Apply incremental migrations to existing tables."""
+    from sqlalchemy import text
+    db = SessionLocal()
+    try:
+        # Add `source` column to analytics if missing
+        result = db.execute(text("PRAGMA table_info(analytics)"))
+        columns = {row[1] for row in result.fetchall()}
+        if 'source' not in columns:
+            db.execute(text("ALTER TABLE analytics ADD COLUMN source TEXT DEFAULT 'direct'"))
+            db.commit()
+
+        # Add `price` column to products if missing
+        result = db.execute(text("PRAGMA table_info(products)"))
+        columns = {row[1] for row in result.fetchall()}
+        if 'price' not in columns:
+            db.execute(text("ALTER TABLE products ADD COLUMN price REAL DEFAULT NULL"))
+            db.commit()
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f"Migration warning: {e}")
+    finally:
+        db.close()
 
 
 def _seed_default_modules():
