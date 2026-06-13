@@ -23,8 +23,13 @@ from .upload_router import router as upload_router
 from .auth import require_admin
 
 # ============ CRUDAdmin Setup ============
-ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
-ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'changeme')
+ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
+if not ADMIN_USERNAME or not ADMIN_PASSWORD:
+    raise RuntimeError(
+        "Missing required env vars: ADMIN_USERNAME and ADMIN_PASSWORD. "
+        "Set them in your hosting platform (Render/Vercel) settings."
+    )
 from .auth import ADMIN_SECRET_KEY as SECRET_KEY
 
 admin = CRUDAdmin(
@@ -70,12 +75,21 @@ app.include_router(upload_router)
 # Mount CRUDAdmin at /admin
 app.mount("/admin", admin.app)
 
+# CORS - allow Vercel frontend
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://sangwoo.top')
+RENDER_URL = os.getenv('RENDER_EXTERNAL_URL', 'https://sangwoo-api.onrender.com')
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'],
+    allow_origins=[
+        FRONTEND_URL,
+        RENDER_URL,
+        "http://localhost:4321",  # Astro dev
+        "http://localhost:3000",  # Vercel dev
+        "http://127.0.0.1:4321",
+    ],
     allow_credentials=True,
-    allow_methods=['*'],
-    allow_headers=['*'],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 @app.middleware("http")

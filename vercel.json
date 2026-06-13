@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/astro",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "status": 404 }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://sangwoo-api.onrender.com/api/:path*"
+    }
+  ],
+  "env": {
+    "BUILD_API": ""
+  }
+}

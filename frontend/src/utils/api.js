@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.BUILD_API || 'http://localhost:8000';
+const API_BASE = import.meta.env.BUILD_API || '';
 
 export async function fetchProducts() {
   try {

@@ -30,7 +30,7 @@ export async function getStaticPaths() {
   );
 }
 
-const apiBase = import.meta.env.BUILD_API || 'http://localhost:8000';
+const apiBase = import.meta.env.BUILD_API || '';
 const productJson = JSON.stringify(product);
 ---
 
